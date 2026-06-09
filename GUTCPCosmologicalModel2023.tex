@@ -1,0 +1,863 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+
+\title{GUTCP Cosmological Model 2023: Audit of a Redshift Counterpart}
+\author{}
+\date{\today}
+
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\zG}{z_{\mathrm{GUTCP}}}
+\newcommand{\RG}{\mathcal{R}}
+\newcommand{\EG}{\mathcal{E}}
+\newcommand{\ZRel}{\mathfrak{Z}_{\mathrm{GUTCP}}}
+\newcommand{\HRel}{\mathfrak{H}_{\parallel,\mathrm{GUTCP}}}
+\newcommand{\DRel}{\mathfrak{D}_{\mathrm{GUTCP}}}
+\newcommand{\ARel}{\mathfrak{A}_{\mathrm{GUTCP}}}
+\newcommand{\BRel}{\mathfrak{B}_{\mathrm{GUTCP}}}
+
+\begin{document}
+\maketitle
+
+\section*{Scope}
+
+This note audits the reconstructed 2023 Chapter 32 material in
+\texttt{docs/reconstructed.tex.pages/} against the existing Mathematica notebook
+\texttt{GUTCPCosmologicalModel.nb}.  The target is not a FLRW redshift
+parameter.  The target is the smallest GUTCP-native candidate for a wavelength
+shift relation that can be written from Mills's equations without importing
+\(1+z=a(t_o)/a(t_e)\).
+
+The notation below treats cosmological observables as relations.  A relation
+may later become a singleton graph after branch, domain, and calibration
+constraints are added, but that uniqueness is extra information and should not
+be hidden inside a symbol.  Thus expressions such as \(H(t)\) or \(d_A(z)\)
+are read as graph/predicate notation unless the text explicitly states that a
+singleton branch has been selected.
+
+\section*{Equation Audit}
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{p{0.08\linewidth}p{0.06\linewidth}p{0.16\linewidth}p{0.31\linewidth}p{0.13\linewidth}p{0.12\linewidth}}
+\toprule
+Mills equation & Page & Section & Extracted TeX & Notebook symbol & Status\\
+\midrule
+\endhead
+32.126 & 1536 & Hubble law &
+\(\displaystyle v=HR\) &
+redshift path premise & supporting\\
+\addlinespace
+32.36 & 1519 & Gravity / particle production &
+\(\displaystyle r_g=\frac{2Gm_0}{c^2}\) &
+\texttt{2 G m/c\^{}2} & matched\\
+\addlinespace
+32.38 & 1520 & Gravity metric &
+\(\displaystyle
+\dd\tau^2=-\left(1-\frac{2Gm_0}{c^2r}\right)\dd t^2
+-\left(1-\frac{2Gm_0}{c^2r}\right)^{-1}\frac{\dd r^2}{c^2}
++\frac{r^2}{c^2}\dd\theta^2
++\frac{r^2\sin^2\theta}{c^2}\dd\phi^2
+\) &
+implicit & supporting\\
+\addlinespace
+32.43 & 1523 & Particle production &
+\(\displaystyle
+\tau=\frac{GM}{r^*c^2}=\frac{r_g}{c}=\frac{v_g}{c}t_i=t_i\Delta
+\) &
+time metric & supporting, OCR risk\\
+\addlinespace
+32.140 & 1542 & Expanding universe &
+\(\displaystyle Q=\frac{c^3}{4\pi G}\) &
+\texttt{c\^{}3/(4 Pi G)} & matched\\
+\addlinespace
+32.146 & 1544 & Minimum radius &
+\(\displaystyle
+\Re_{\min}=\left(\frac{\cdots}{4\pi\sigma eT^4}\right)^{1/2}
+\) with printed result \(8.52\times 10^{27}\,\mathrm{m}\) &
+\texttt{alephMin} & ambiguous norm.\\
+\addlinespace
+32.149 & 1545 & Oscillation period &
+\(\displaystyle T_U=\frac{4\pi Gm_U}{c^3}\), but the printed numerical value is
+\(3.10\times10^{19}\,\mathrm{s}\) for \(m_U\simeq2\times10^{54}\,\mathrm{kg}\) &
+period in \texttt{aleph[t\_]} & mismatch: numeric convention uses \(2\pi Gm_U/c^3\)\\
+\addlinespace
+32.153 & 1546 & Radius evolution &
+\(\displaystyle
+X(t)=2.16\times10^{28}-1.86\times10^{28}
+\cos\!\left(\frac{2\pi t}{9.83\times10^{11}\,\mathrm{yr}}\right)\,\mathrm{m}
+\) &
+\texttt{aleph[t\_]} & matched numeric\\
+\addlinespace
+32.154 & 1546 & Expansion rate &
+\(\displaystyle \dot X=4\pi c\,
+\sin\!\left(\frac{2\pi t}{9.83\times10^{11}\,\mathrm{yr}}\right)\) &
+\texttt{alephRate[t\_]} & matched\\
+\addlinespace
+32.156 & 1547 & Hubble constant &
+\(\displaystyle H(t)=\frac{\dot S}{ct}
+=\frac{4\pi c\sin(\cdots)}{ct}\) &
+\texttt{H[t\_]} & matched; denominator under audit\\
+\addlinespace
+32.158 & 1548 & Matter inventory &
+\(\displaystyle
+m_U(t)=\frac{m_U}{2}
+\left(1+\cos\!\left(\frac{2\pi t}{2\pi Gm_U/c^3}\right)\right)
+\) &
+\texttt{mUBook[t\_]} & matched; commentary conflict\\
+\addlinespace
+32.165 & 1551 & Temp./redshift &
+\(\displaystyle
+\lambda_\infty=\lambda(r)\left(1+\frac{2Gm_U}{rc^2}\right)
+\) &
+\texttt{zGUTCP} & endpoint correction\\
+\addlinespace
+p.1579 & 1579 & CMBR structure scale &
+\(\displaystyle L_\ell=\frac{2}{\ell}\,2\pi r_{\mathrm{sphere}}
+=\frac{4\pi r_{\mathrm{sphere}}}{\ell}\) &
+\texttt{cmbrScale} & stated; not BAO\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section*{GUTCP \(z\): Denominator Audit}
+
+[FORCED] The observational redshift is defined by the wavelength ratio
+\[
+1+z=\frac{\lambda_o}{\lambda_e}.
+\]
+Mills gives a Hubble-law structure in Eq. (32.126), \(v=HR\), and then gives
+the oscillatory radius and rate in Eqs. (32.153)--(32.154).  Page 1540--1544
+frames the mechanism as mass-energy conversion causing spacetime expansion:
+matter creation contracts spacetime, matter-to-energy release expands it, and
+redshift/blueshift time stamps the extent of spacetime expansion between
+observer and observed.  Therefore the denominator in \(H=\dot R/R\) must be
+the spacetime scale or extent being compared.
+
+Using the notebook and the numerical convention of Eqs. (32.153)--(32.156),
+\begin{align}
+\theta(t) &= \omega t,&
+\omega &= \frac{2\pi}{T_U},&
+T_U &= \frac{2\pi GM_0}{c^3},\\
+\RG(t) &= \frac{2GM_0}{c^2}
++\frac{4\pi GM_0}{c^2}\left[1-\cos\theta(t)\right],&
+\dot{\RG}(t)&=4\pi c\,\sin\theta(t).
+\end{align}
+The printed Eq. (32.149) instead gives \(T_U=4\pi GM_0/c^3\); that
+factor-of-two choice remains a convention switch.
+
+[CHOSEN] Mills's Eq. (32.156) replaces the Hubble-law denominator by \(ct\):
+\begin{equation}
+H_{ct}(t)=\frac{\dot{\RG}(t)}{ct}
+=\frac{4\pi\sin\theta(t)}{t}.
+\label{eq:h-ct}
+\end{equation}
+This is the step that creates a damped sinc-like graph from an oscillatory
+radius.  Its associated path-redshift relation is
+\begin{equation}
+\boxed{
+\ZRel^{ct}(t_e,t_o,z)
+\Longleftrightarrow
+1+z
+=
+\exp\!\left[
+\int_{t_e}^{t_o} H_{ct}(t)\,\dd t
+\right]
+}
+\label{eq:zgutcp-ct}
+\end{equation}
+or, for the numerical period convention,
+\begin{equation}
+\boxed{
+\ZRel^{ct}(t_e,t_o,z)
+\Longleftrightarrow
+1+z
+=
+\exp\!\left[
+4\pi\left(\operatorname{Si}(\omega t_o)
+-\operatorname{Si}(\omega t_e)\right)
+\right],
+}
+\label{eq:zgutcp-ct-si}
+\end{equation}
+where \(\operatorname{Si}(x)=\int_0^x(\sin u/u)\,\dd u\).  This preserves the
+notebook calculation, but it is not forced by the arrow-of-time construction.
+
+[FORCED] If Eq. (32.126) is applied to the whole oscillatory GUTCP radius, then
+\[
+H_{\RG}(t)=\frac{\dot{\RG}(t)}{\RG(t)},\qquad
+\dd\ln(1+\zG)=H_{\RG}(t)\,\dd t.
+\]
+The integral is exact:
+\begin{equation}
+\boxed{
+\ZRel^{\RG}(t_e,t_o,z)
+\Longleftrightarrow
+1+z=\frac{\RG(t_o)}{\RG(t_e)}.
+}
+\label{eq:zgutcp-radius}
+\end{equation}
+This expression has the same algebraic shape as a FLRW scale-factor ratio, but
+here it is derived from Mills's \(v=HR\) and his \(\RG(t)\), not assumed from
+FLRW geometry.
+
+[CHOSEN] The stronger reading of page 1542 is that redshift time stamps the
+\emph{extent of spacetime expansion} from the minimum-radius bounce, not the
+entire radius including the finite gravitational-radius offset.  Define
+\begin{equation}
+\EG(t)=\RG(t)-\RG_{\min},\qquad
+\RG_{\min}=\frac{2GM_0}{c^2}.
+\end{equation}
+Then
+\[
+H_{\EG}(t)=\frac{\dot{\EG}(t)}{\EG(t)}
+=\frac{\dot{\RG}(t)}{\RG(t)-\RG_{\min}},
+\]
+and the corrected expansion-extent redshift is
+\begin{equation}
+\boxed{
+\ZRel^{\EG}(t_e,t_o,z)
+\Longleftrightarrow
+1+z=
+\frac{\RG(t_o)-\RG_{\min}}{\RG(t_e)-\RG_{\min}}.
+}
+\label{eq:zgutcp-extent}
+\end{equation}
+This removes the artificial \(1/t\) damping introduced by \(ct\), and it keeps
+Mills's claim that redshift/blueshift records the extent of expansion.  It is
+also the branch form implemented as the Python default
+\texttt{expansion\_extent}.
+
+\section*{Endpoint Clock Correction}
+
+The second redshift-relevant ingredient is Mills's explicit gravitational
+wavelength statement, Eq. (32.165):
+\begin{equation}
+\lambda_\infty=\lambda(r)B(r),
+\qquad
+B(r)=1+\frac{2Gm_U}{rc^2}.
+\label{eq:mills-redshift-factor}
+\end{equation}
+
+[FORCED] If Eq.~\eqref{eq:mills-redshift-factor} is accepted as a wavelength
+shift law and if two finite \(r\)-spheres are compared through the same
+\(\lambda_\infty\) reference, then the algebraic endpoint clock ratio is
+\begin{equation}
+\lambda_o B(r_o)=\lambda_e B(r_e),
+\qquad
+\ZRel^B(t_e,t_o,z)\Longleftrightarrow
+1+z=\frac{\lambda_o}{\lambda_e}
+=\frac{B(r_e)}{B(r_o)}.
+\end{equation}
+Removing Eq. (32.165) removes the wavelength-shift law; removing the common
+\(\lambda_\infty\) comparison removes the finite-radius ratio.
+
+With \(r=\RG(t)\), the endpoint factor is
+\begin{equation}
+\boxed{
+\ZRel^{B}(t_e,t_o,z;M_z)
+\Longleftrightarrow
+1+z
+=
+\frac{
+1+\dfrac{2G\,M_z(t_e)}{c^2\RG(t_e)}
+}{
+1+\dfrac{2G\,M_z(t_o)}{c^2\RG(t_o)}
+}
+}
+\label{eq:zgutcp-endpoint}
+\end{equation}
+where \(M_z(t)\) is the mass parameter used in the redshift factor.  The most
+literal Eq. (32.165) choice is \(M_z(t)=M_0\).  The Eq. (32.158) choice is
+\begin{equation}
+M_z(t)=m_U(t)=\frac{M_0}{2}\left(1+\cos\theta(t)\right).
+\end{equation}
+
+[CHOSEN] If the Eq. (32.165) endpoint clock factor is treated as separate from
+the expansion-extent stretching, the combined redshift relation is
+\begin{equation}
+\boxed{
+\ZRel^{\EG B}(t_e,t_o,z;M_z)
+\Longleftrightarrow
+1+z
+=
+\frac{\RG(t_o)-\RG_{\min}}{\RG(t_e)-\RG_{\min}}
+\frac{
+1+\dfrac{2G\,M_z(t_e)}{c^2\RG(t_e)}
+}{
+1+\dfrac{2G\,M_z(t_o)}{c^2\RG(t_o)}
+}.
+}
+\label{eq:zgutcp-combined}
+\end{equation}
+The Python artifact exposes the denominator choices explicitly:
+\texttt{expansion\_extent}, \texttt{radius\_scale}, \texttt{mills\_ct\_path},
+\texttt{mills\_endpoint}, and combined endpoint modes.  The
+\texttt{expansion\_extent} mode is the selected GUTCP redshift relation
+counterpart to the FLRW \(z\) parameter; the endpoint factor is a printed Mills
+correction relation that can be included or audited separately.
+
+\section*{Branch Inversion}
+
+[FORCED] For fixed \(t_o\), a redshift law is a relation on
+\((t_e,z)\), not automatically a singleton graph in either direction.  For a selected
+redshift relation \(\ZRel^\star\), define the emission-time fiber
+\begin{equation}
+\mathcal{T}_{z}^{\star}(z;t_o)=
+\left\{t_e<t_o:\ \ZRel^\star(t_e,t_o,z)\right\}.
+\label{eq:emission-time-fiber}
+\end{equation}
+This set may contain zero, one, or many emission times.  A branch condition
+\(\mathfrak{B}_{\mathrm{GUTCP},b}(t_e,t_o,z)\) restricts the fiber to
+\begin{equation}
+\mathcal{T}_{z,b}^{\star}(z;t_o)=
+\left\{t_e<t_o:\ \ZRel^\star(t_e,t_o,z)\wedge
+\mathfrak{B}_{\mathrm{GUTCP},b}(t_e,t_o,z)\right\}.
+\label{eq:branch-restricted-fiber}
+\end{equation}
+Only when this restricted fiber is a singleton is it harmless to write
+\(t_b(z)\) as shorthand for its sole member.
+
+For a radial light-front relation, the corresponding light-travel-distance
+relation is
+\begin{equation}
+\DRel^\star(z,D;t_o)
+\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z}^{\star}(z;t_o)
+\wedge D=c(t_o-t_e)
+\right].
+\label{eq:light-distance-relation}
+\end{equation}
+This relation is the necessary replacement for a single FLRW \(D(z)\).
+Oscillation does not remove distance-redshift solutions; it changes the
+cardinality of the fibers and therefore makes branch information explicit.
+
+\section*{Blueshift Threshold Relations}
+
+[FORCED] If \(t_o\) is measured from the start of the current expansion and a
+radial light-front relation is used,
+\begin{equation}
+\mathfrak{D}_{\mathrm{light}}(t_e,t_o,D)
+\Longleftrightarrow
+D=c(t_o-t_e),
+\label{eq:radial-light-distance}
+\end{equation}
+then the threshold at which the emission event leaves the current-expansion
+branch is
+\begin{equation}
+\mathfrak{D}_{\mathrm{enter-blue}}(D_\star,t_o)
+\Longleftrightarrow
+D_\star=c\,t_o.
+\label{eq:blue-segment-entry-threshold}
+\end{equation}
+For \(D<c\,t_o\), the emission time satisfies \(0<t_e<t_o\), so the path lies
+inside the current expansion branch.  For \(D>c\,t_o\), the relation gives
+\(t_e<0\), so a pre-current-expansion segment has entered the path.  That is
+the first threshold at which a contraction/blueshift segment can become part
+of the redshift relation.
+
+[CHOSEN] This threshold is not the same as the threshold for \emph{net}
+endpoint blueshift.  For the even oscillatory endpoint relations
+\(\RG(-t)=\RG(t)\) and \(\EG(-t)=\EG(t)\), the endpoint-only neutral condition
+is \(t_e=-t_o\), hence
+\begin{equation}
+\mathfrak{D}_{\mathrm{net-neutral}}(D_\star,t_o)
+\Longleftrightarrow
+D_\star=2c\,t_o.
+\label{eq:net-blue-threshold}
+\end{equation}
+Under that endpoint-only symmetry, \(D>2c\,t_o\) gives an emission event whose
+oscillatory radius/extent exceeds the observation value, so the endpoint ratio
+is net blueshift.  Between \(c\,t_o\) and \(2c\,t_o\), a blueshift segment may
+enter the path while the endpoint ratio can still be net redshift.
+
+[FORCED] These thresholds are branch-admissibility relations.  If an
+independent observational relation supplies or bounds \(D\), then
+\[
+D<c\,t_o
+\]
+selects the current-expansion branch and excludes branches requiring
+\(t_e<0\).  Conversely,
+\[
+D>c\,t_o
+\]
+excludes a current-expansion-only branch and forces a segmented relation that
+admits a pre-current-expansion portion of the path.
+
+[CHOSEN] If the symmetric endpoint-only rule is the branch rule being tested,
+the observed sign of \(z\) adds a second pruning condition:
+\begin{equation}
+\mathfrak{B}_{\mathrm{sign}}(D,t_o,s)
+\Longleftrightarrow
+\begin{cases}
+D<2c\,t_o, & s=\mathrm{red},\\
+D=2c\,t_o, & s=\mathrm{neutral},\\
+D>2c\,t_o, & s=\mathrm{blue}.
+\end{cases}
+\label{eq:blue-sign-branch-admissibility}
+\end{equation}
+Thus a positive observed redshift can rule out a candidate branch whose
+endpoint-symmetric relation already lies beyond the net-blue threshold.  This
+does not make the full distance-redshift relation unique by itself; it removes
+inadmissible members from the fiber before any singleton branch is selected.
+
+[WEAKEST LINK] The expansion-extent relation has \(\EG(0)=0\).  A light path
+that crosses the exact minimum-radius boundary therefore requires an additional
+bounce or matching relation before the segmented redshift product is physically
+well defined.  The whole-radius relation avoids this zero but includes the
+finite gravitational-radius offset.
+
+\section*{Koksbang--Heinesen FLRW-Consistency Standard}
+
+The local reference paper by Koksbang and Heinesen, stored under
+\texttt{docs/cites/} as the model-independent generalized-FLRW consistency PDF,
+sets a useful external standard for a fair comparison.  Its model-independent
+pipeline does not begin with a cosmological parameter fit.  It reconstructs
+redshift-indexed observable relations, conventionally written in graph
+shorthand as
+\begin{equation}
+d_A(z),\qquad d_A'(z),\qquad d_A''(z),\qquad
+H_{\parallel}(z),\qquad H_{\parallel}'(z),
+\label{eq:kh-input-bundle}
+\end{equation}
+where \(d_A\) is the angular diameter distance and \(H_{\parallel}\) is the
+line-of-sight expansion rate
+\begin{equation}
+H_{\parallel}=\frac{1}{3}\theta-e^\mu a_\mu+e^\mu e^\nu\sigma_{\mu\nu}.
+\label{eq:kh-line-of-sight-h}
+\end{equation}
+The paper then evaluates generalized FLRW consistency diagnostics over the
+overlap of the supernova and BAO reconstructions, with the currently useful
+domain beginning at \(z=0.38\) and extending to order \(z\simeq2\).
+
+[FORCED] BAO is not a direct model-independent \(d_A\) datum.  The measured
+object is a clustering-feature relation in angle/redshift space; the usual
+compressed reductions are ratios or products such as \(D_M(z)/r_d\),
+\(H_{\parallel}(z)r_d\), or \(D_V(z)/r_d\).  Transverse BAO therefore becomes
+an angular-ruler constraint only after a sound-horizon/ruler relation and a
+distance dictionary are admitted.  In a GUTCP comparison it belongs on the
+conditional data-model side, not as the missing GUTCP angular-diameter
+propagation relation itself.
+
+[FORCED] Mills's page-1579 treatment is a different claimed ruler relation,
+not a BAO reduction.  He takes the present Earth \(r\)-sphere radius as
+\[
+r_{\mathrm{sphere}}=14.02\times10^9\ \mathrm{ly}
+\]
+and the corresponding angular view as
+\[
+A_{\mathrm{view}}=2\pi r_{\mathrm{sphere}}
+=88.09\times10^9\ \mathrm{ly}.
+\]
+For a CMBR multipole \(\ell\), the stated sky fraction is \(2/\ell\), so the
+large-structure scale relation is
+\begin{equation}
+\mathfrak{M}_{\mathrm{CMBR}}
+(\ell,r_{\mathrm{sphere}},L)
+\Longleftrightarrow
+L=\frac{2}{\ell}A_{\mathrm{view}}
+=\frac{4\pi r_{\mathrm{sphere}}}{\ell}.
+\label{eq:mills-cmbr-structure-scale}
+\end{equation}
+This gives \(L_{15}=11.7\times10^9\) ly, \(L_{135}=1.3\times10^9\) ly, and
+\(L_{700}=0.25\times10^9\) ly, matching the examples Mills assigns to the
+Hercules--Corona Borealis Great Wall, the Big Ring, and smaller higher-order
+structures.  The relation is therefore a GUTCP/CMBR multipole structure-scale
+claim.  It should not be collapsed into the BAO transverse-scale data product.
+Testing it against observed arcs or rings still requires the relevant object
+selection, angular extent, redshift extent, and observational distance
+dictionary to be stated as relations.
+
+In relation notation, the angular-diameter observation is at least
+\begin{equation}
+\mathfrak{A}_{\mathrm{obs}}
+\left(z,d_A,\dd A_{\mathrm{emit}},\dd\Omega_{\mathrm{obs}}\right)
+\Longleftrightarrow
+d_A^2=\frac{\dd A_{\mathrm{emit}}}{\dd\Omega_{\mathrm{obs}}}.
+\label{eq:angular-diameter-observation}
+\end{equation}
+This relation can be stated without FLRW.  What is still needed for GUTCP is
+the constitutive relation that connects
+\((\dd A_{\mathrm{emit}},\dd\Omega_{\mathrm{obs}})\) to a selected GUTCP light
+path, phase, mass convention, and branch.
+
+Two of the diagnostic targets are especially useful for auditing a non-FLRW
+proposal.  The integrated CBL relation is written in singleton-graph shorthand as
+\begin{equation}
+O(z)=H_{\parallel}(z)^2D'(z)^2-1,
+\qquad
+O \xrightarrow{\mathrm{FLRW}} \Omega_{k,0}H_0^2,
+\label{eq:kh-o}
+\end{equation}
+where \(D\) is the distance variable used in the CBL integral relation.  The
+density/\(\Lambda\)CDM diagnostic is
+\begin{equation}
+M(z)=
+\frac{2H_{\parallel}(z)^2}{3d_A(z)(1+z)}
+\left[
+-d_A'(z)
++\left(\frac{2}{1+z}+\frac{H_{\parallel}'(z)}{H_{\parallel}(z)}\right)d_A(z)
++d_A''(z)
+\right],
+\label{eq:kh-m}
+\end{equation}
+with \(M\to\Omega_{m,0}H_0^2\) in \(\Lambda\)CDM under the paper's stated
+assumptions.  The full generalized CBL statistic \(C(z)\) similarly combines
+\(d_A\), \(H_{\parallel}\), their derivatives, optical shear/expansion, and
+Ricci focusing; the FLRW null expectation is \(C=0\).
+
+[FORCED] Applying that standard to GUTCP requires more than a redshift
+relation.  A branch relation must be selected so that
+\[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o),
+\]
+and then the branch-restricted GUTCP quantities must be joined with
+observable relations.  For example,
+\begin{align}
+\mathfrak{H}_{\parallel,\mathrm{GUTCP},b}^{\star}(z,H;t_o)
+&\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o)
+\wedge H=H_{\parallel}(t_e)
+\right],
+\\
+\mathfrak{A}_{\mathrm{GUTCP},b}^{\star}(z,d_A;t_o)
+&\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o)
+\wedge
+\mathfrak{A}_{\mathrm{obs}}(\cdots)
+\wedge
+\mathfrak{L}_{\mathrm{GUTCP},b}(\cdots)
+\right].
+\end{align}
+Here \(\mathfrak{L}_{\mathrm{GUTCP},b}\) denotes the missing GUTCP
+light-bundle/angular propagation relation.  The corrected expansion-extent
+\(\ZRel^{\EG}\) constrains the redshift-time relation, but it does not by
+itself constrain \(\mathfrak{L}_{\mathrm{GUTCP},b}\).
+
+[FORCED] The frontier relation is open, but it is not unconstrained.  Pages
+1569, 1577--1579, and the page-1602 footnote give information that any candidate
+\(\mathfrak{L}_{\mathrm{GUTCP},b}\) must either incorporate or explicitly
+exclude:
+\[
+\Delta T_E(\ell)=
+C_{\mathrm{effThompson}}\,77\,
+\mathrm{sinc}\!\left(\frac{\pi}{140}(\ell+197)\right)\,\mu\mathrm{K},
+\]
+\[
+\Delta T_B(\ell)=
+r^{1/2}C_{\mathrm{effThompson}}\,77\,
+\mathrm{sinc}\!\left(\frac{\pi}{140}(\ell+197+70)\right)\,\mu\mathrm{K},
+\qquad
+r^{1/2}=\frac{\Delta\aleph}{ct}.
+\]
+Mills identifies these as polarization/lensing constraints: scattering
+produces E-mode correlation multipoles, gravitational lensing and accelerating
+spacetime convert E-mode structure into B-mode structure, and the large-scale
+matter distribution inherits CMBR multipole/lensing patterns.  Together with
+Eq.~\eqref{eq:mills-cmbr-structure-scale}, these pages constrain the possible
+angular/light-bundle closure but still do not supply the map
+\[
+(t_e,t_o,\mathrm{branch},\mathrm{source\ geometry})
+\longmapsto
+(\dd A_{\mathrm{emit}},\dd\Omega_{\mathrm{obs}}).
+\]
+Page 1569 adds a separate constraint and a separate risk: Mills uses CMBR
+structures of about \(1^\circ\) as evidence for nearly flat geometry since the
+commencement of expansion, but the same sentence ties the geometry claim to a
+commencement of expansion ``about 10 billion years ago.''  Since the notebook
+calibration cannot generally accept \(t_{\mathrm{now}}=10^{10}\) yr as an
+input without overconstraining the \(H_0\)/CMB temperature solve, any
+\(\mathfrak{L}_{\mathrm{GUTCP},b}\) derived from that geometry discussion must
+separate the near-flat/angular-structure claim from the fixed-10-Gyr
+approximation.
+
+The page-1602 footnote adds an observational-reference constraint.  Mills
+identifies a practical reference for absolute space at rest as a bright
+celestial body with zero translational velocity within its \(r\)-sphere, or
+with that velocity component corrected.  He then proposes a Cepheid of the
+corresponding calculated age/distance relative to the current \(r\)-sphere as
+an approximate point at rest on a selected \(r\)-sphere, and states that
+changes in angular diameter over the pulsation cycle combined with
+spectroscopic radial velocity determine distance quasi-geometrically.  A
+candidate \(\mathfrak{L}_{\mathrm{GUTCP},b}\) therefore cannot use an arbitrary
+observer frame: it must either encode this absolute-rest/Cepheid calibration
+relation or explicitly explain why it is not part of the optical dictionary.
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{p{0.12\linewidth}p{0.32\linewidth}p{0.32\linewidth}p{0.14\linewidth}}
+\toprule
+Source & Relation fragment & Constraint on \(\mathfrak{L}_{\mathrm{GUTCP}}\) & Status\\
+\midrule
+\endhead
+p.1569 & BOOMERANG \(1^\circ\) CMBR structures and nearly flat geometry since
+commencement of expansion & Candidate angular closure must decide whether this
+is a curvature/flatness constraint, while not importing fixed \(10^{10}\) yr as
+a calibration input & constraining input with calibration hazard\\
+\addlinespace
+p.1602 footnote & Absolute-rest reference object and Cepheid angular-diameter
+plus spectroscopic-radial-velocity distance calibration & Candidate optical
+dictionary must specify the \(r\)-sphere rest-frame/velocity-correction rule
+and how quasi-geometrical Cepheid distances anchor the scale & constraining
+input\\
+\addlinespace
+p.1577, Eq. 32.203 & E-mode CMBR multipole pattern from Thompson scattering &
+Any optical relation including polarization must preserve the stated
+\(\ell\)-indexed E-mode phase and amplitude convention & constraining input\\
+\addlinespace
+p.1577, Eqs. 32.204--32.205 & B-mode pattern shifted by \(70\) in \(\ell\)
+with amplitude ratio \(\Delta\aleph/(ct)\) & Candidate lensing/accelerating
+spacetime closure must explain the E-to-B conversion and amplitude ratio &
+constraining input\\
+\addlinespace
+p.1578 & Gravitational lensing produces rings/arcs and is linked to matter
+formation patterns & Candidate light-bundle relation must decide how lensing
+maps photon bundles into observed angular structures & constraining input\\
+\addlinespace
+p.1579 & CMBR multipole scale \(L_\ell=4\pi r_{\mathrm{sphere}}/\ell\) &
+Large-ring/arc comparisons should use the CMBR multipole ruler relation, not
+BAO transverse scale by default & stated relation\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{p{0.14\linewidth}p{0.28\linewidth}p{0.28\linewidth}p{0.20\linewidth}}
+\toprule
+Required relation & Paper standard & Current GUTCP artifact & Fair evaluation\\
+\midrule
+\endhead
+\(\ZRel\) & Observed redshift relation for \(d_A\) and \(H_{\parallel}\) &
+\(\ZRel(t_e,t_o,z)\) stated after choosing denominator/endpoint convention &
+conditional, branch dependent\\
+\addlinespace
+\(\mathcal{T}_{z,b}\) & Restrict redshift fibers to index model quantities &
+Implemented as multi-valued emission-time fibers & requires branch/window bits\\
+\addlinespace
+\(\HRel\) & Line-of-sight expansion rate relation, not merely a named
+``Hubble constant'' & \(H_{\EG}\), \(H_{\RG}\), or Mills \(H_{ct}\) joined to a
+selected branch fiber & partial; convention must be declared\\
+\addlinespace
+\(\partial_z\HRel\) & Redshift derivative relation for \(C\) and \(M\) &
+reducible only after a stable branch relation & not yet paper-equivalent\\
+\addlinespace
+\(\ARel\) & Angular-diameter observational relation reconstructed from
+supernovae & general relation stated in Eq.~\eqref{eq:angular-diameter-observation};
+GUTCP angular-propagation relation not stated & relation gap\\
+\addlinespace
+\(\partial_z\mathfrak{A},\partial_z^2\mathfrak{A}\) & Required distance-derivative relations
+& not reducible until \(\ARel\) is joined to a GUTCP branch/angular relation &
+relation gap\\
+\addlinespace
+\(\mathrm{BAO}\) ruler & BAO constrains \(D_M/r_d\),
+\(H_{\parallel}r_d\), or \(D_V/r_d\), not bare \(d_A\) & can be joined only as
+a conditional ruler/data relation & not a model-independent GUTCP \(d_A\)
+datum\\
+\addlinespace
+\(C,O,M\) & Diagnostic FLRW/general-spacetime consistency relations with
+uncertainty bands & cannot be fairly reduced from \(H(t)\) and light-travel
+distance alone & not yet evaluable at full standard\\
+\bottomrule
+\end{longtable}
+\endgroup
+
+[CHOSEN] The Python artifact therefore exposes a readiness table and
+branch-specific surrogate observable relations rather than forcing a numerical
+Koksbang--Heinesen \(C/O/M\) reduction.  For example, from a selected branch
+one may state
+\[
+\mathfrak{D}_{\mathrm{GUTCP},\mathrm{light},b}^{\star}(z,D;t_o)
+\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o)
+\wedge D=c(t_o-t_e)
+\right]
+\]
+and a candidate
+\(\mathfrak{H}_{\parallel,\mathrm{GUTCP},b}^{\star}(z,H;t_o)\).  But
+\[
+\mathfrak{D}_{\mathrm{GUTCP},\mathrm{light},b}^{\star}
+\ne
+\mathfrak{A}_{\mathrm{GUTCP},b}^{\star}
+\]
+unless an additional GUTCP angular-size propagation law is supplied.  Treating
+light-travel distance as angular diameter distance would import an
+observational dictionary not present in the audited material.
+
+[FORCED] A fair comparison to the paper is therefore a readiness verdict, not a
+premature rejection.  GUTCP now has candidate redshift relations and
+branch-restricted fibers.  It does not yet meet the paper's full standard
+because the GUTCP angular-diameter relation, its derivative relations, the
+optical shear/focusing relations, and an uncertainty relation/pipeline are not
+yet joined to the current artifact.
+
+[CHOSEN] In MDL terms, the information needed to select a GUTCP branch/window
+is part of the model description length.  That cost should be compared against
+the information needed by FLRW models to describe the observed departures in
+angular-size and distance diagnostics.  The paper's standard is suitable for
+that comparison because it asks for observable relations and residuals, not for
+membership in the FLRW class.
+
+\section*{Appendix A: \(H_0\) Target Sweep}
+
+The notebook line
+\[
+\texttt{H0GUTCP = H[tNow]}
+\]
+defines a model quantity:
+\begin{equation}
+H_{0,\mathrm{GUTCP}}(t_{\mathrm{now}},T_{\mathrm{start}})
+=H(t_{\mathrm{now}};M_0(T_{\mathrm{start}})).
+\end{equation}
+It is not, by itself, an independent prediction of the observed Hubble
+constant.  The later Mathematica equality
+\[
+\texttt{(H0GUTCP/.quantitiesSubs) == QuantityMagnitude[UnitConvert[Subscript[H,0]]]}
+\]
+is a calibration condition.  To make this explicit, replace the Wolfram entity
+lookup with a named target:
+\begin{align}
+H_{0,\mathrm{GUTCP}}(t_{\mathrm{now}},T_{\mathrm{start}})
+&=H_{0,\mathrm{target}},\\
+T_U(t_{\mathrm{now}};T_{\mathrm{start}})
+&=T_{\mathrm{CMB,obs}}.
+\end{align}
+This is why the original notebook solved for \(t_{\mathrm{now}}\) instead of
+using Mills's approximate \(10^{10}\) yr value as an input.  If
+\(t_{\mathrm{now}}\) is fixed, then \(T_{\mathrm{start}}\) is the only remaining
+unknown, but the notebook has two empirical equations to satisfy:
+\[
+H_{0,\mathrm{GUTCP}}(T_{\mathrm{start}})=H_{0,\mathrm{target}},
+\qquad
+T_U(T_{\mathrm{start}})=T_{\mathrm{CMB,obs}}.
+\]
+Those two constraints are generally inconsistent for one unknown.  Leaving
+\((t_{\mathrm{now}},T_{\mathrm{start}})\) free gives a determined two-equation,
+two-unknown calibration problem rather than an overconstrained one.
+
+The sweep variable is therefore \(H_{0,\mathrm{target}}\), commonly entered as
+\texttt{H0TargetKmSecMpc}.  Each selected target gives a calibrated pair
+\((t_{\mathrm{now}},T_{\mathrm{start}})\).  This makes the Hubble-tension scan a
+model-fitting exercise, not a claim that the GUTCP equations alone selected the
+empirical \(H_0\).
+
+\section*{Appendix B: Observational Relation Gap}
+
+The current notebook states time-parametrized relations:
+\[
+H(t),\qquad \mathrm{LightRadius}(t),\qquad T_U(t),\qquad m_U(t),\qquad P_U(t).
+\]
+It does not yet state a complete observational relation
+\[
+t \longleftrightarrow z_{\mathrm{GUTCP}}
+\]
+that is independent of FLRW and reduced by branch constraints.  In particular,
+one should not assume the whole-radius relation
+\[
+\ZRel^{\RG}(t_e,t_o,z)\Longleftrightarrow
+1+z=\frac{\RG(t_o)}{\RG(t_e)}
+\]
+merely by analogy with FLRW.  The denominator audit above derives two GUTCP
+relations from Mills's own variables: the whole-radius relation
+Eq.~\eqref{eq:zgutcp-radius}, and the expansion-extent relation
+Eq.~\eqref{eq:zgutcp-extent}.  The latter is selected here because page 1542
+describes redshift/blueshift as time stamps of the \emph{extent of spacetime
+expansion} between observer and observed.
+
+Eq.~\eqref{eq:zgutcp-extent} states a GUTCP-native redshift relation for a
+specified emission time, observation time, and redshift value.  Oscillation does
+not imply that the distance-redshift relation has no solution; it implies that
+the relevant fibers may have multiple members.  A complete observational
+relation must include the relevant branch, observation window, and light path
+through phases where ancient light may undergo partial blueshifting as well as
+redshifting.  Only after such constraints are joined can external diagnostics be
+stated as relations:
+\begin{align}
+\mathfrak{H}_{\parallel,\mathrm{GUTCP},b}(z,H;t_o)
+&\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o)\wedge H=H_{\parallel}(t_e)
+\right],
+\\
+\mathfrak{D}_{\mathrm{GUTCP},b}(z,D;t_o)
+&\Longleftrightarrow
+\exists t_e\,
+\left[
+t_e\in\mathcal{T}_{z,b}^{\star}(z;t_o)\wedge D=c(t_o-t_e)
+\right].
+\end{align}
+This is the point at which comparisons to non-FLRW observational frameworks,
+including Heinesen--Clifton style line-of-sight expansion and distance
+diagnostics, become well-posed.  If \(\mathcal{T}_{z,b}^{\star}\) is later
+shown to be a singleton fiber over a chosen domain, then the familiar
+singleton-graph notation is merely a compression of these relations.
+
+\section*{Audit Conclusion}
+
+[FORCED] Mills's page 1540--1544 arrow-of-time argument makes spacetime
+expansion the dynamic variable.  Eq. (32.126) then requires the denominator of
+\(H=\dot R/R\) to be the compared spacetime scale or extent.  The later
+substitution \(R=ct\) in Eq. (32.156) is not forced by that derivation and
+produces a damped sinc-like \(H_{ct}(t)\) from an otherwise oscillatory
+\(\RG(t)\).
+
+[CHOSEN] The corrected GUTCP counterpart to FLRW \(z\) selected here is the
+expansion-extent relation
+\[
+\ZRel^{\EG}(t_e,t_o,z)
+\Longleftrightarrow
+1+z=
+\frac{\RG(t_o)-\RG_{\min}}{\RG(t_e)-\RG_{\min}},
+\]
+because Mills describes redshift/blueshift as a timestamp of the extent of
+spacetime expansion.  The whole-radius relation is also exposed as a
+convention, but it includes the finite gravitational-radius offset rather than
+just the expansion extent.
+
+[FORCED] Eq.~\eqref{eq:zgutcp-endpoint} is separately forced as a finite
+endpoint clock ratio after accepting Mills's Eq. (32.165), a common
+\(\lambda_\infty\) reference, and the substitution \(r=\RG(t)\).
+
+[CHOSEN] The Python artifact defaults to the notebook/numerical period convention
+\(T_U=2\pi GM_0/c^3\), because that is the convention that reproduces Eq. (32.156)
+and the quoted \(H_0\simeq78.5\,\mathrm{km\,s^{-1}\,Mpc^{-1}}\) at
+\(t=10^{10}\) yr when used as Mills's worked example.  The calibrated notebook
+does not use \(10^{10}\) yr as an input because doing so would overconstrain the
+two empirical conditions.  That calibration remains a \(\texttt{mills\_ct}\)
+calibration unless the denominator convention is changed and the fit is repeated.
+The Python artifact exposes the printed Eq. (32.149) convention as an option.
+
+[FORCED] Under the Koksbang--Heinesen consistency standard, a fair external
+evaluation must use angular-diameter, distance-derivative, line-of-sight
+expansion, and expansion-derivative relations.  The current GUTCP artifact
+states branch-specific redshift fibers, candidate line-of-sight expansion
+relations, and light-travel-distance relations.  It has not yet joined these
+to the GUTCP angular-diameter relation required by the paper, because the
+needed light-propagation and angular-size relation has not been stated.
+
+[WEAKEST LINK] The first weak link is Mills's unforced \(ct\) denominator in
+Eq. (32.156).  The second is branch selection: Mills does not provide enough
+material in the audited 2023 pages to select a singleton inverse fiber
+\(\mathcal{T}_{z,b}^{\star}\) for light that crosses the oscillatory history.
+The third is the angular-diameter relation.  The corrected redshift relation
+can be stated, but a paper-equivalent \(C/O/M\) comparison remains conditional
+until the branch relation, line-of-sight expansion relation, angular-diameter
+relation, and uncertainty relation/pipeline are joined.
+
+\end{document}

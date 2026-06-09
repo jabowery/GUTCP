@@ -1,0 +1,269 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* CreatedBy='Codex' *)
+
+Notebook[{
+Cell["GUTCP 2023 Relation-First Layer", "Title"],
+
+Cell["This notebook is a new 2023 artifact. It does not modify GUTCPCosmologicalModel.nb. It loads the relation-first Wolfram Language source and keeps GUTCP redshift, branch, angular-diameter, and calibration objects as relations until branch/domain constraints force singleton fibers.", "Text"],
+
+Cell["Load Relation Source", "Section"],
+
+Cell[BoxData[
+ RowBox[{"Get", "[",
+  RowBox[{"FileNameJoin", "[",
+   RowBox[{"{",
+    RowBox[{
+     RowBox[{"NotebookDirectory", "[", "]"}], ",",
+     "\"GUTCPCosmologicalModel2023Relations.wl\""}], "}"}], "]"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"relationLayerStatus", "=", 
+  RowBox[{"<|", 
+   RowBox[{
+    RowBox[{"\"zExpansionExtentRelIsEquation\"", "->", 
+     RowBox[{"MatchQ", "[", 
+      RowBox[{
+       RowBox[{"zExpansionExtentRel", "[", 
+        RowBox[{"tEmit", ",", "tObs", ",", "z", ",", "m"}], "]"}], ",", 
+       "_Equal"}], "]"}]}], ",", 
+    RowBox[{"\"branchFiberIsConjunction\"", "->", 
+     RowBox[{"MatchQ", "[", 
+      RowBox[{
+       RowBox[{"branchRestrictedFiberRel", "[", 
+        RowBox[{
+        "zExpansionExtentRel", ",", "currentExpansionBranchRel", ",", 
+         "tEmit", ",", "tObs", ",", "z", ",", "m"}], "]"}], ",", "_And"}], 
+      "]"}]}], ",", 
+    RowBox[{"\"angularDiameterObsRelIsEquation\"", "->", 
+     RowBox[{"MatchQ", "[", 
+      RowBox[{
+       RowBox[{"angularDiameterObsRel", "[", 
+        RowBox[{"z", ",", "dA", ",", "sourceArea", ",", 
+         "observedSolidAngle"}], "]"}], ",", "_Equal"}], "]"}]}], ",", 
+    RowBox[{"\"gutcpLightBundleRelIsOpen\"", "->", 
+     RowBox[{
+      RowBox[{"DownValues", "[", "gutcpLightBundleRel", "]"}], "===", 
+      RowBox[{"{", "}"}]}]}]}], "|>"}]}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"readinessRows", "//", "TableForm"}]], "Input"],
+
+Cell["Notebook Algebra as Relations", "Section"],
+
+Cell["The algebraic expressions are available with Expr suffixes, but the model-facing objects use Rel suffixes and return Boolean predicates suitable for Reduce.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"radiusRel", "[", RowBox[{"t", ",", "r", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"expansionExtentRel", "[",
+  RowBox[{"t", ",", "extent", ",", "mUAtStart"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"hubbleExpansionExtentRel", "[",
+  RowBox[{"t", ",", "h", ",", "mUAtStart"}], "]"}]], "Input"],
+
+Cell["Redshift Relations", "Section"],
+
+Cell["The corrected expansion-extent redshift is a relation on {tEmit, tObs, z}. It is not an inverse function until a branch condition reduces the relevant fiber to one element.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"zExpansionExtentRel", "[",
+  RowBox[{"tEmit", ",", "tObs", ",", "z", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"zRadiusScaleRel", "[",
+  RowBox[{"tEmit", ",", "tObs", ",", "z", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"zCtPathRel", "[",
+  RowBox[{"tEmit", ",", "tObs", ",", "z", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell["Branch Fibers", "Section"],
+
+Cell["Branch information is explicitly separate. The fiber may contain zero, one, or many emission times. ToRules should be applied only after Reduce has established a singleton branch fiber.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"redshiftFiberRel", "[",
+  RowBox[{
+   "zExpansionExtentRel", ",", "tEmit", ",", "tObs", ",", "z", ",",
+   "mUAtStart"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"branchRestrictedFiberRel", "[",
+  RowBox[{
+   "zExpansionExtentRel", ",", "currentExpansionBranchRel", ",", "tEmit",
+   ",", "tObs", ",", "z", ",", "mUAtStart"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"emissionFiberReduce", "[",
+  RowBox[{
+   "zExpansionExtentRel", ",", "currentExpansionBranchRel", ",", "z",
+   ",", "tObs", ",", "tEmit", ",", "mUAtStart", ",",
+   RowBox[{
+    RowBox[{"mUAtStart", ">", "0"}], "&&",
+    RowBox[{"c", ">", "0"}], "&&",
+    RowBox[{"G", ">", "0"}], "&&",
+   RowBox[{"z", ">=", "0"}]}]}], "]"}]], "Input"],
+
+Cell["Distance Thresholds and Blueshift", "Section"],
+
+Cell["If tObs is measured from the start of the current expansion, dLight == c tObs is the threshold where the emission event leaves the current-expansion branch. That is where a pre-current-expansion blueshift segment can enter the path. Under the symmetric endpoint-only oscillatory relation, the net red/net-blue boundary is later: dLight == 2 c tObs.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"radialLightTravelDistanceRel", "[",
+  RowBox[{"tEmit", ",", "tObs", ",", "dLight"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"blueShiftSegmentEntryThresholdRel", "[",
+  RowBox[{"dThreshold", ",", "tObs"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"beyondCurrentExpansionStartRel", "[",
+  RowBox[{"dLight", ",", "tObs"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"symmetricEndpointNeutralThresholdRel", "[",
+  RowBox[{"dThreshold", ",", "tObs"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"symmetricEndpointNetBlueRel", "[",
+  RowBox[{"dLight", ",", "tObs"}], "]"}]], "Input"],
+
+Cell["The distance thresholds can prune the branch fiber. A red or blue observed z sign is an additional relation, not a function-selection shortcut.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"currentExpansionDistanceAdmissibleRel", "[",
+  RowBox[{"dLight", ",", "tObs"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"preCurrentSegmentRequiredRel", "[",
+  RowBox[{"dLight", ",", "tObs"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"observedRedshiftSignRel", "[",
+  RowBox[{"z", ",", "sign"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"endpointSymmetricSignAdmissibleRel", "[",
+  RowBox[{"dLight", ",", "tObs", ",", "red"}], "]"}]], "Input"],
+
+Cell["CMBR Multipole Structure Relation", "Section"],
+
+Cell["Mills page 1579 uses the present r-sphere angular view and the sky fraction 2/ell to assign large arcs and rings to CMBR multipoles rather than BAO. This is a stated relation, not an angular-diameter propagation law.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"cmbrMultipoleStructureRel", "[",
+  RowBox[{"ell", ",", "rSphereLy", ",", "scaleLy"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"Table", "[",
+  RowBox[{
+   RowBox[{"{",
+    RowBox[{
+     "ell", ",",
+     RowBox[{"N", "[",
+      RowBox[{"cmbrMultipoleSkyFractionExpr", "[", "ell", "]"}], "]"}], ",",
+     RowBox[{"N", "[",
+      RowBox[{
+       RowBox[{"cmbrMultipoleStructureScaleExpr", "[",
+        RowBox[{"ell", ",", RowBox[{"14.02", "*", RowBox[{"10", "^", "9"}]}]}],
+        "]"}], "/", RowBox[{"10", "^", "9"}]}], "]"}]}], "}"}], ",",
+   RowBox[{"{",
+    RowBox[{"ell", ",", RowBox[{"{", RowBox[{"15", ",", "135", ",", "700"}], "}"}]}],
+    "}"}]}], "]"}]], "Input"],
+
+Cell["Light-Bundle Frontier Constraints", "Section"],
+
+Cell["gutcpLightBundleRel remains open, but pages 1569, 1577-1579, and the page-1602 footnote constrain any candidate closure through near-flat geometry, absolute-rest calibration, polarization, lensing, and CMBR multipole structure relations.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"gutcpLightBundleConstraintRows", "//", "TableForm"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"nearFlatGeometryClaimRel", "[",
+  RowBox[{"cmbrAngularSizeDeg", ",", "tExpansionYears"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"tenGyrGeometryCalibrationHazardRel", "[",
+  RowBox[{"tClaimYears", ",", "tCalibratedYears"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"absoluteRestReferenceRel", "[",
+  RowBox[{"translationalVelocity", ",", "correctedVelocity"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"cepheidQuasiGeometricDistanceRel", "[",
+  RowBox[{
+   "distance", ",", "angularDiameterChange", ",", "radialVelocityCurve", ",",
+   "pulsationCycle"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"eModePolarizationRel", "[",
+  RowBox[{"ell", ",", "deltaTE", ",", "cEff"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"bModePolarizationRel", "[",
+  RowBox[{"ell", ",", "deltaTB", ",", "cEff", ",", "bOverERatio"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"bOverERatioRel", "[",
+  RowBox[{"bOverERatio", ",", "deltaAleph", ",", "lightSphereRadius"}],
+  "]"}]], "Input"],
+
+Cell["Arcsine as a Relation", "Section"],
+
+Cell["The arcsine form is not the primitive object. The primitive is a sine-squared relation. The ArcSin representation is admitted only after current-expansion branch constraints are present.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"thetaExtentRel", "[",
+  RowBox[{"thetaEmit", ",", "z", ",", "tObs", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell[BoxData[
+ RowBox[{"thetaExtentCurrentExpansionArcSinRel", "[",
+  RowBox[{"thetaEmit", ",", "z", ",", "tObs", ",", "mUAtStart"}], "]"}]],
+ "Input"],
+
+Cell["Angular-Diameter Relation", "Section"],
+
+Cell["The general angular-diameter observation is stated as a relation. The GUTCP light-bundle/angular propagation relation is deliberately left open as gutcpLightBundleRel.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"angularDiameterObsRel", "[",
+  RowBox[{"z", ",", "dA", ",", "sourceArea", ",",
+   "observedSolidAngle"}], "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"DownValues", "[", "gutcpLightBundleRel", "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"angularDiameterGUTCPRel", "[",
+  RowBox[{
+   "z", ",", "dA", ",", "tEmit", ",", "tObs", ",", "sourceArea", ",",
+   "observedSolidAngle", ",", "currentExpansion"}], "]"}]], "Input"],
+
+Cell["Calibration as Relation", "Section"],
+
+Cell["The original notebook solved for tNow and CMBRTempAtStart. Here that step is represented as a calibration relation on {tObs, tempStart}. Fixing tObs before reduction leaves tempStart to satisfy two empirical constraints and may overconstrain the fiber.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"calibrationRel", "[",
+  RowBox[{"tObs", ",", "tempStart", ",", "h0Target", ",", "cmbTarget"}],
+  "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"fixedTimeCalibrationRel", "[",
+  RowBox[{"tFixed", ",", "tempStart", ",", "h0Target", ",", "cmbTarget"}],
+  "]"}]], "Input"]
+},
+WindowTitle -> "GUTCP 2023 Relation-First Layer"]

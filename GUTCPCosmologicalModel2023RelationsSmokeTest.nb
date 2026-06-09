@@ -1,0 +1,28 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* CreatedBy='Codex' *)
+
+Notebook[{
+Cell["GUTCP Cosmological Model 2023: Relation Smoke Test", "Title"],
+
+Cell["This notebook loads the relation-first smoke test without modifying the original GUTCPCosmologicalModel.nb. The expected output is an Association whose structural checks evaluate to True, with gutcpLightBundleRel intentionally open.", "Text"],
+
+Cell[BoxData[
+ RowBox[{"Get", "[",
+  RowBox[{"FileNameJoin", "[",
+   RowBox[{"{",
+    RowBox[{
+     RowBox[{"NotebookDirectory", "[", "]"}], ",",
+     "\"GUTCPCosmologicalModel2023RelationsSmokeTest.wl\""}], "}"}], "]"}],
+  "]"}]], "Input"],
+
+Cell["The same test can be run from any blank notebook with:", "Text"],
+
+Cell[BoxData[
+ RowBox[{"Get", "[",
+  "\"/home/jabowery/devel/GUTCP/GUTCPCosmologicalModel2023RelationsSmokeTest.wl\"",
+  "]"}]], "Input"]
+},
+WindowTitle -> "GUTCP 2023 Relation Smoke Test"]
+
