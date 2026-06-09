@@ -1,0 +1,147 @@
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from typing import Optional, Callable
+import argparse
+
+J_PER_KG_TNT = 4.184e6
+J_PER_KT_TNT = 4.184e12
+
+class ConstantTau:
+    def __init__(self, tau: float = 0.01):
+        self.tau = float(tau)
+    def __call__(self, v_kms: np.ndarray) -> np.ndarray:
+        return np.full_like(v_kms, self.tau, dtype=float)
+
+class PowerLawTau:
+    def __init__(self, tau0: float = 0.01, v0: float = 20.0, gamma: float = 1.0):
+        self.tau0 = float(tau0)
+        self.v0 = float(v0)
+        self.gamma = float(gamma)
+    def __call__(self, v_kms: np.ndarray) -> np.ndarray:
+        v = np.asarray(v_kms, dtype=float)
+        tau = self.tau0 * np.power(np.maximum(v, 1e-6)/self.v0, self.gamma)
+        return np.clip(tau, 1e-4, 0.2)
+
+class SmoothBracketTau:
+    def __init__(self, lo: float = 0.003, hi: float = 0.03, v_lo: float = 15.0, v_hi: float = 60.0):
+        self.lo = float(lo)
+        self.hi = float(hi)
+        self.v_lo = float(v_lo)
+        self.v_hi = float(v_hi)
+    def __call__(self, v_kms: np.ndarray) -> np.ndarray:
+        v = np.asarray(v_kms, dtype=float)
+        v_mid = 0.5*(self.v_lo + self.v_hi)
+        k = 0.3
+        sigm = 1.0 / (1.0 + np.exp(-k*(v - v_mid)))
+        tau = self.lo + (self.hi - self.lo) * sigm
+        return np.clip(tau, 1e-4, 0.2)
+
+def derive_radiant_energy_from_photometry(row, I0_W_at_mag0: Optional[float], shape_factor: float = 0.5) -> Optional[float]:
+    if pd.isna(row.get("peak_mag")) or pd.isna(row.get("duration_s")):
+        return None
+    I0 = row.get("I0_W_at_mag0", I0_W_at_mag0)
+    if I0 is None or pd.isna(I0):
+        return None
+    I_peak = I0 * 10**(-0.4 * float(row["peak_mag"]))
+    return float(shape_factor) * float(row["duration_s"]) * I_peak
+
+def compute_kinetic_energy_joules(df: pd.DataFrame,
+                                  tau_model: Callable[[np.ndarray], np.ndarray],
+                                  I0_W_at_mag0: Optional[float] = None,
+                                  shape_factor: float = 0.5) -> pd.DataFrame:
+    out = df.copy()
+    if "v_kms" not in out.columns:
+        raise ValueError("Input data frame must include 'v_kms'.")
+    if "radiant_energy_J" not in out.columns:
+        out["radiant_energy_J"] = out.apply(
+            lambda r: derive_radiant_energy_from_photometry(r, I0_W_at_mag0, shape_factor),
+            axis=1
+        )
+    v = out["v_kms"].to_numpy(dtype=float)
+    tau = tau_model(v)
+    radiant = out["radiant_energy_J"].to_numpy(dtype=float)
+    E_kin = radiant / tau
+    out["E_kin_J"] = E_kin
+    out["E_kgTNT"] = E_kin / J_PER_KG_TNT
+    out["E_ktTNT"] = E_kin / J_PER_KT_TNT
+    return out
+
+def log_histogram(data: np.ndarray, dex: float = 0.25):
+    x = np.asarray(data, dtype=float)
+    x = x[np.isfinite(x) & (x > 0)]
+    if x.size == 0:
+        raise ValueError("No positive finite values for histogram.")
+    lo, hi = np.min(x), np.max(x)
+    log_lo, log_hi = np.log10(lo), np.log10(hi)
+    nbins = max(5, int(np.ceil((log_hi - log_lo) / dex)))
+    edges = np.logspace(log_lo, log_hi, nbins+1)
+    counts, edges = np.histogram(x, bins=edges)
+    return edges, counts
+
+def plot_histogram_and_cdf(E_kin_J: np.ndarray, title_prefix: str = "", dex: float = 0.25):
+    edges, counts = log_histogram(E_kin_J, dex=dex)
+    centers = np.sqrt(edges[:-1] * edges[1:])
+    plt.figure(figsize=(7,4.5))
+    plt.step(centers, counts, where="mid")
+    plt.xscale("log")
+    plt.xlabel("Kinetic energy (J)")
+    plt.ylabel("Count per bin (log-spaced)")
+    plt.title((title_prefix + " — " if title_prefix else "") + "Differential Histogram")
+    plt.tight_layout()
+    plt.show()
+
+    x = np.sort(E_kin_J[np.isfinite(E_kin_J) & (E_kin_J>0)])
+    N = np.arange(x.size, 0, -1)
+    plt.figure(figsize=(7,4.5))
+    plt.step(x, N, where="post")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.xlabel("Kinetic energy (J)")
+    plt.ylabel("N (≥ E)")
+    plt.title((title_prefix + " — " if title_prefix else "") + "Empirical CDF")
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description="Empirical histogram/CDF of meteor energies from photometry")
+    p.add_argument("--csv", default="/mnt/data/demo_meteor_photometry.csv", help="Input CSV path")
+    p.add_argument("--tau", default="smooth", choices=["const","power","smooth"], help="Tau(v) model")
+    p.add_argument("--tau-const", type=float, default=0.01, help="If --tau=const, set constant tau")
+    p.add_argument("--tau0", type=float, default=0.01, help="If --tau=power, tau(v)=tau0*(v/v0)^gamma")
+    p.add_argument("--v0", type=float, default=20.0, help="Reference speed v0 for power-law tau")
+    p.add_argument("--gamma", type=float, default=1.0, help="Gamma for power-law tau")
+    p.add_argument("--lo", type=float, default=0.003, help="Smooth lo tau value")
+    p.add_argument("--hi", type=float, default=0.03, help="Smooth hi tau value")
+    p.add_argument("--v-lo", type=float, default=15.0, help="Smooth low-speed point (km/s)")
+    p.add_argument("--v-hi", type=float, default=60.0, help="Smooth high-speed point (km/s)")
+    p.add_argument("--i0", type=float, default=None, help="Global I0_W_at_mag0 if radiant_energy_J is absent")
+    p.add_argument("--shape", type=float, default=0.5, help="Light-curve shape factor (default triangular 0.5)")
+    p.add_argument("--bin-dex", type=float, default=0.25, help="Log10 bin width in dex")
+    p.add_argument("--out", default="/mnt/data/meteor_empirical_energies.csv", help="Output CSV path")
+    args = p.parse_args()
+
+    if args.tau == "const":
+        tau_model = ConstantTau(args.tau_const)
+    elif args.tau == "power":
+        tau_model = PowerLawTau(args.tau0, args.v0, args.gamma)
+    else:
+        tau_model = SmoothBracketTau(args.lo, args.hi, args.v_lo, args.v_hi)
+
+    df = pd.read_csv(args.csv)
+    if "event_id" not in df.columns:
+        df["event_id"] = [f"row{i:06d}" for i in range(len(df))]
+
+    df_out = compute_kinetic_energy_joules(df, tau_model, I0_W_at_mag0=args.i0, shape_factor=args.shape)
+    mask_ok = np.isfinite(df_out["E_kin_J"]) & (df_out["E_kin_J"] > 0)
+    df_valid = df_out.loc[mask_ok].copy()
+    df_valid.to_csv(args.out, index=False)
+
+    # Optional quick-look plots if running interactively
+    try:
+        plot_histogram_and_cdf(df_valid["E_kin_J"].to_numpy(), title_prefix="Empirical (Photometry→Energy)", dex=args.bin_dex)
+    except Exception:
+        pass
+
+    print(f"Wrote: {args.out} (rows: {len(df_valid)})")
